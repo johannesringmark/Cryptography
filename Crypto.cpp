@@ -53,14 +53,19 @@ return "Enqrypted";
 string enqrypt(char *argv[]){
 char * str1 = argv[1];
 char * str2 = argv[2]; 
+int flag; 
 string b = " Invalid commad";
 if(strcmp(str1,"--encrypt")==0){
+    flag = 0;
+}else if(strcmp(str1,"--decrypt")==0){
+    flag = 1;
+}
         if(strcmp(str2,"-subst")==0){
           //b = "Substitution";
-          b = caesar_cipher(argv[3],0);
+          b = caesar_cipher(argv[3],flag);
         }
-        else if(strcmp(str2,"-subst")==0){
-          b = "Monoalphabetic";
+        else if(strcmp(str2,"-ces")==0){
+          b = caesar_cipher(argv[3],flag);;
           //monoalphabetic_cipher(argv[1],argv[2]);  
         }
         else if(strcmp(str2,"-mono")==0){
@@ -72,12 +77,6 @@ if(strcmp(str1,"--encrypt")==0){
           //transpositon_cipher(argv[1], argv[2]); 
         }
 
-}else if(strcmp(str1,"--decrypt")==0){
-                if(strcmp(str2,"-subst")==0){
-               //b = "Substitution";
-                b = caesar_cipher(argv[3],1);
-        }
-    }
 return b;
 }
 
