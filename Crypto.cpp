@@ -5,20 +5,24 @@ using namespace std;
 //struct ()
 
 
-//  string substitution_cipher(string key, string a) {
-// char m[a.size()];  
-// for ( int i = 0; i < a.size();i++ )
-// {
-//     if (i < key.size()){
-//     m[i] = (a.at(i) + (int)(key.at(i) + i));  
-//    }else{
-//     m[i] = (a.at(i) + i);
-//    }
+ string substitution_cipher(string key, string a,int f) {
+char m[a.size()];
+string newkey = key.append("abcdefghijklmnopqrstuvxyz");
+ cout << newkey << " "<< '\n';
+ cout << a << " "<< '\n';  
 
-// }
-// string str(m); 
-// return str;
-//};
+for ( int i = 0; i < a.size();i++ )
+{
+    if (i < newkey.size()){
+    m[i] = (a.at(i) + (int)(newkey.at(i)));  
+   }else{
+    m[i] = (a.at(i));
+   }
+
+}
+string str(m); 
+return str;
+};
 
 string caesar_cipher(string a,int f) {
 char m[a.size()]; 
@@ -62,7 +66,7 @@ if(strcmp(str1,"--encrypt")==0){
 }
         if(strcmp(str2,"-subst")==0){
           //b = "Substitution";
-          b = caesar_cipher(argv[3],flag);
+          b = substitution_cipher(argv[3],argv[4],flag);
         }
         else if(strcmp(str2,"-ces")==0){
           b = caesar_cipher(argv[3],flag);;
