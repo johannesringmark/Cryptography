@@ -338,7 +338,7 @@ int main(int argc, char *argv[]){
 		mpz_init(xy.y);
 		mpz_init(rs.s);
 		mpz_init(rs.r);
-		//cout << "verify" << endl;
+		cout << "verify" << endl;
 		getline (myfile,line);
   		mpz_set_str(xy.y,&line.c_str()[2],10);
   		cout << (&line.c_str()[2]) << endl;
@@ -368,7 +368,11 @@ int main(int argc, char *argv[]){
     // {
     //   cout << line << endl;
     // }
+    mpz_clear(pqg.p);
+  	mpz_clear(pqg.q);
+  	mpz_clear(pqg.g);
     myfile.close();
+
   }
    else cout << "Unable to open file"<< endl; 
 
