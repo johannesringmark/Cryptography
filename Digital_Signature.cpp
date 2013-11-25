@@ -335,6 +335,9 @@ int main(int argc, char *argv[]){
 		key_pair xy;
 		sign_pair rs;
 		message_digest D;
+		mpz_init(xy.y);
+		mpz_init(rs.s);
+		mpz_init(rs.r);
 		//cout << "verify" << endl;
 		getline (myfile,line);
   		mpz_set_str(xy.y,&line.c_str()[2],10);
@@ -357,7 +360,7 @@ int main(int argc, char *argv[]){
     // 	}
   		mpz_clear(xy.y);
   		mpz_clear(rs.r);
-  		mpz_clear(rs.r);
+  		mpz_clear(rs.s);
 	};
 
 
