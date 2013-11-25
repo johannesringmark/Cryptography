@@ -3,6 +3,7 @@
 #include <gmp.h>
 #include <cmath>
 #include <bitset>
+#include <cstdlib>
  
 using namespace std;
 const int L=1024;
@@ -139,7 +140,7 @@ m_inverse inverse_value(mpz_t* z,mpz_t* a){ //seems ok tested with the values fr
   	}
 		
 	
-	free(p);
+	//free(p);
 	//cout << "not here 5" << endl;
 	mpz_add_ui(C,C,tmp);
 	//cout << "not here 6" << endl;
@@ -262,18 +263,22 @@ return 1;
 	return 0;
  }
 
-int main(int argc, char *argv[]){
+//int main(int argc, char *argv[]){
+ int main(){
   tuple pqg;
    mpz_t z;
    mpz_t a;
    mpz_t y;
+   string input;
+   cout <<" Enter file path "<< input;
+   cin << input;
 
   mpz_init(pqg.p);
   mpz_init(pqg.q);
   mpz_init(pqg.g);
     
   string line;
-  ifstream myfile (argv[1]);
+  ifstream myfile (input);
   if (myfile.is_open())
   {
   	getline (myfile,line);
