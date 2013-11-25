@@ -321,14 +321,14 @@ int main(int argc, char *argv[]){
   		mpz_set_str(xy.y,&line.c_str()[2],10);
   		cout << &line.c_str()[2] << endl;
 
-  		// while ( getline (myfile,line) )
-    // 	{
-    //   		getline (myfile,line);
-  		// 	D.M = &line.c_str()[2];
-  		// 	cout << (&line.c_str()[2]) << endl;
-  		// 	signing_operation(pqg,xy,D);
+  		while ( getline (myfile,line) )
+    	{
+      		getline (myfile,line);
+  			D.M = &line.c_str()[2];
+  			cout << (&line.c_str()[2]) << endl;
+  			//signing_operation(pqg,xy,D);
       		
-    // 	}
+    	}
 
 	 }
 	else if(strcmp(line.c_str(),"verify") == 0){
@@ -341,21 +341,21 @@ int main(int argc, char *argv[]){
 		cout << "verify" << endl;
 		getline (myfile,line);
   		mpz_set_str(xy.y,&line.c_str()[2],10);
-  		cout << (&line.c_str()[2]) << endl;
+  		//cout << (&line.c_str()[2]) << endl;
 
   		while ( getline (myfile,line) )
     	{
     		getline (myfile,line);
   			D.M = &line.c_str()[2];
-  			cout << (&line.c_str()[2]) << endl;
+  			//cout << (&line.c_str()[2]) << endl;
 
     		getline (myfile,line);
   			mpz_set_str(rs.r,&line.c_str()[2],10);
-  			cout << (&line.c_str()[2]) << endl;
+  			//cout << (&line.c_str()[2]) << endl;
 
   			getline (myfile,line);
   			mpz_set_str(rs.s,&line.c_str()[2],10);
-  			cout << (&line.c_str()[2]) << endl;
+  			//cout << (&line.c_str()[2]) << endl;
       		//verification_algorithm(&pqg, &xy.y, &D,&rs);
     	}
   		mpz_clear(xy.y);
