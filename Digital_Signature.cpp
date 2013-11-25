@@ -179,20 +179,22 @@ sign_pair signing_operation(tuple pqg,key_pair a,message_digest m){
 	 //set(hej.x)
 	return hej;
  }
-bool verification_algorithm(tuple pqg, mpz_t y, message_digest m,sign_pair rs){
+bool verification_algorithm(tuple* pqg, mpz_t* y, message_digest* m,sign_pair* rs){
+	 cout << "not here 8" << endl;
 	 mpz_t w,z,u1,u2,v,M,tmp2,tmp1,r;
+	  cout << "not here 8" << endl;
 	  mpz_init(w);mpz_init(z);mpz_init(u1);mpz_init(u2);mpz_init(v);mpz_init(M);mpz_init(tmp1);mpz_init(tmp2);
-	  mpz_init(m.Mi);
-	  message_to_int(&m);
+	  mpz_init((*m).Mi);
+	  message_to_int(&(*m));
 	//1;
 
 	//check 0 < r' < q and 0 < s' < q; if either condition is violated,
-	if(!(mpz_cmp_ui(rs.r,0) && mpz_cmp(pqg.q,rs.r) && mpz_cmp_ui(rs.s,0) && mpz_cmp(pqg.q,rs.s)) ){
+	if(!(mpz_cmp_ui((*rs).r,0) && mpz_cmp((*pqg).q,(*rs).r) && mpz_cmp_ui((*rs).s,0) && mpz_cmp((*pqg).q,(*rs).s)) ){
 		cout << "signature_invalid 1" << endl;
 		// printf("0 < r' %i\n", mpz_cmp_ui(rs.r,0));
 		// printf("0 < s' %i\n", mpz_cmp(pqg.q,rs.r));
 		// printf("r' < q %i\n", mpz_cmp_ui(rs.s,0));
-		// printf("s' < q %i\n", mpz_cmp(pqg.q,rs.s));
+		 printf("s' < q %i\n", mpz_cmp((*pqg).q,(*rs).s));
 		
 		return 0;
 		
@@ -204,35 +206,35 @@ bool verification_algorithm(tuple pqg, mpz_t y, message_digest m,sign_pair rs){
 	// u1 = (zw) mod q
 	// u2 = ((r')w) mod q.
 	// v  = (g^u1 y^u2 mod p)mod q
-	//cout << "not here 8" << endl;
-	mpz_set(w,inverse_value(&rs.s,&pqg.q).p);// mod q;
-	//cout << "not here 8" << endl;
-	mpz_set(z,m.Mi) ;
+	cout << "not here 8" << endl;
+	mpz_set(w,inverse_value(&(*rs).s,&(*pqg).q).p);// mod q;
+	cout << "not here 8" << endl;
+	mpz_set(z,(*m).Mi) ;
 	mpz_mul(u1, z,w);
-	mpz_mod(u1,u1,pqg.q);
+	mpz_mod(u1,u1,(*pqg).q);
 	gmp_printf("u1 %Zd\n", u1);
 	
-	//cout << "not here 9" << endl;
-	mpz_mul(u2, r,w);
-	mpz_mod(u2,u2,pqg.q);
+	cout << "not here 9" << endl;
+	mpz_mul(u2,(*rs).r,w);
+	mpz_mod(u2,u2,(*pqg).q);
 	gmp_printf("u2 %Zd\n", u2);
 	
 	//v  = (((pqg.g^(u1) * y^(u2)) % pqg.p) % pqg.q);
-	mpz_powm(tmp1,pqg.g,u1,pqg.p);
-	mpz_powm(tmp2,y,u2,pqg.p);
+	mpz_powm(tmp1,(*pqg).g,u1,(*pqg).p);
+	mpz_powm(tmp2,(*y),u2,(*pqg).p);
 	mpz_mul(v,tmp1,tmp2);
 	gmp_printf("v %Zd\n", v);
-	mpz_mod(v,v,pqg.p);
-	mpz_mod(v,v,pqg.q);
+	mpz_mod(v,v,(*pqg).p);
+	mpz_mod(v,v,(*pqg).q);
 
 	//3;
 	//if v = r', then signarture is verified else return invalid 
-	if (mpz_cmp(v,rs.r) != 0){
+	if (mpz_cmp(v,(*rs).r) != 0){
 		//mzp_t = 
 		//int 
 		gmp_printf("v %Zd\n", v);
 		//gmp_printf("M=%Zd\n", s.Mi);
-		 gmp_printf("r' %Zd\n", rs.r);
+		 gmp_printf("r' %Zd\n", (*rs).r);
 		cout << "signature_invalid 2" << endl;
 		return 0;
 	}
@@ -283,15 +285,15 @@ int main(int argc, char *argv[]){
   {
   	getline (myfile,line);
   	mpz_set_str(pqg.p,&line.c_str()[2],10);
-  	//cout << (&line.c_str()[2]) << endl;
+  	cout << (&line.c_str()[2]) << endl;
 
 	getline (myfile,line);
   	mpz_set_str(pqg.q,&line.c_str()[2],10);
-  	//cout << &line.c_str()[2] << endl;
+  	cout << &line.c_str()[2] << endl;
 
   	getline (myfile,line);
   	mpz_set_str(pqg.g,&line.c_str()[2],10);
-  	//cout << &line.c_str()[2] << endl;
+  	cout << &line.c_str()[2] << endl;
 
   	isvalid(&pqg);
 
@@ -310,23 +312,23 @@ int main(int argc, char *argv[]){
 	else if(strcmp(line.c_str(),"sign") == 0){
 	   	message_digest D;
 	   	key_pair xy;
-	   	//cout << "sign" << endl;
+	   	cout << "sign" << endl;
 	   	getline (myfile,line);
   		mpz_set_str(xy.x,&line.c_str()[2],10);
-  		//cout << (&line.c_str()[2]) << endl;
-
+  		cout << (&line.c_str()[2]) << endl;
+  		//free(line)
 		getline (myfile,line);
   		mpz_set_str(xy.y,&line.c_str()[2],10);
-  		//cout << &line.c_str()[2] << endl;
+  		cout << &line.c_str()[2] << endl;
 
-  		while ( getline (myfile,line) )
-    	{
-      		getline (myfile,line);
-  			D.M = &line.c_str()[2];
-  			//cout << (&line.c_str()[2]) << endl;
-  			signing_operation(pqg,xy,D);
+  		// while ( getline (myfile,line) )
+    // 	{
+    //   		getline (myfile,line);
+  		// 	D.M = &line.c_str()[2];
+  		// 	cout << (&line.c_str()[2]) << endl;
+  		// 	signing_operation(pqg,xy,D);
       		
-    	}
+    // 	}
 
 	 }
 	else if(strcmp(line.c_str(),"verify")== 0){
@@ -336,34 +338,36 @@ int main(int argc, char *argv[]){
 		//cout << "verify" << endl;
 		getline (myfile,line);
   		mpz_set_str(xy.y,&line.c_str()[2],10);
-  		//cout << (&line.c_str()[2]) << endl;
+  		cout << (&line.c_str()[2]) << endl;
 
-  		while ( getline (myfile,line) )
-    	{
-    		getline (myfile,line);
-  			D.M = &line.c_str()[2];
-  			//cout << (&line.c_str()[2]) << endl;
+  		// while ( getline (myfile,line) )
+    // 	{
+    // 		getline (myfile,line);
+  		// 	D.M = &line.c_str()[2];
+  		// 	//cout << (&line.c_str()[2]) << endl;
 
-    		getline (myfile,line);
-  			mpz_set_str(rs.r,&line.c_str()[2],10);
-  			//cout << (&line.c_str()[2]) << endl;
+    // 		getline (myfile,line);
+  		// 	mpz_set_str(rs.r,&line.c_str()[2],10);
+  		// 	//cout << (&line.c_str()[2]) << endl;
 
-  			getline (myfile,line);
-  			mpz_set_str(rs.s,&line.c_str()[2],10);
-  			//cout << (&line.c_str()[2]) << endl;
-      		verification_algorithm(pqg, xy.y, D,rs);
-    	}
-
+  		// 	getline (myfile,line);
+  		// 	mpz_set_str(rs.s,&line.c_str()[2],10);
+  		// 	//cout << (&line.c_str()[2]) << endl;
+    //   		//verification_algorithm(&pqg, &xy.y, &D,&rs);
+    // 	}
+  		mpz_clear(xy.y);
+  		mpz_clear(rs.r);
+  		mpz_clear(rs.r);
 	};
 
 
-    while ( getline (myfile,line) )
-    {
-      cout << line << endl;
-    }
+    // while ( getline (myfile,line) )
+    // {
+    //   cout << line << endl;
+    // }
     myfile.close();
   }
-   else cout << "Unable to open file"; 
+   else cout << "Unable to open file"<< endl; 
 
 return 0;
  }
