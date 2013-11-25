@@ -298,9 +298,6 @@ int main(int argc, char *argv[]){
   	isvalid(&pqg);
 
   	getline (myfile,line);
-  	cout << "Error" << endl;
-  	string haha = line.c_str();
-  	cout << "Error2" << endl;
   	if(strcmp(line.c_str(),"genkey") == 0){
 	  	//cout << "genkey" << endl;
 	  	int n;
@@ -335,16 +332,16 @@ int main(int argc, char *argv[]){
 
 	 }
 	else if(strcmp(line.c_str(),"verify") == 0){
-		// key_pair xy;
-		// sign_pair rs;
-		// message_digest D;
-		// mpz_init(xy.y);
-		// mpz_init(rs.s);
-		// mpz_init(rs.r);
-		// cout << "verify" << endl;
-		// getline (myfile,line);
-  // 		mpz_set_str(xy.y,&line.c_str()[2],10);
-  // 		cout << (&line.c_str()[2]) << endl;
+		key_pair xy;
+		sign_pair rs;
+		message_digest D;
+		mpz_init(xy.y);
+		mpz_init(rs.s);
+		mpz_init(rs.r);
+		cout << "verify" << endl;
+		getline (myfile,line);
+  		mpz_set_str(xy.y,&line.c_str()[2],10);
+  		cout << (&line.c_str()[2]) << endl;
 
   		// while ( getline (myfile,line) )
     // 	{
@@ -361,9 +358,9 @@ int main(int argc, char *argv[]){
   		// 	//cout << (&line.c_str()[2]) << endl;
     //   		//verification_algorithm(&pqg, &xy.y, &D,&rs);
     // 	}
-  		// mpz_clear(xy.y);
-  		// mpz_clear(rs.r);
-  		// mpz_clear(rs.s);
+  		mpz_clear(xy.y);
+  		mpz_clear(rs.r);
+  		mpz_clear(rs.s);
 	};
 
 
@@ -371,10 +368,10 @@ int main(int argc, char *argv[]){
     // {
     //   cout << line << endl;
     // }
-   //  mpz_clear(pqg.p);
-  	// mpz_clear(pqg.q);
-  	// mpz_clear(pqg.g);
-   //  myfile.close();
+    mpz_clear(pqg.p);
+  	mpz_clear(pqg.q);
+  	mpz_clear(pqg.g);
+    myfile.close();
 
   }
    else cout << "Unable to open file"<< endl; 
