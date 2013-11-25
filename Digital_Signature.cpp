@@ -146,7 +146,7 @@ m_inverse inverse_value(mpz_t* z,mpz_t* a){ //seems ok tested with the values fr
 	//cout << "not here 6" << endl;
 	mpz_set((*M).Mi,C);
 	//cout << "not here 7" << endl;
-	//gmp_printf("M=%Zd\n", (*M).Mi);
+	gmp_printf("M=%Zd\n", (*M).Mi);
 	mpz_clear(C);
 	//cout << "not here 6" << endl;
 return 0;
@@ -155,7 +155,7 @@ return 0;
 sign_pair signing_operation(tuple pqg,key_pair a,message_digest m){
 	 mpz_t r,s,k,k_inv,tmp;
 	 message_to_int(&m);
-	 int z;
+	 long z;
 	 int L = (m.M.size() * 8);  
 	 mpz_init(r);mpz_init(s);mpz_init(k);mpz_init(k_inv);mpz_init(tmp);
 	//generate k
@@ -181,9 +181,11 @@ sign_pair signing_operation(tuple pqg,key_pair a,message_digest m){
  }
 bool verification_algorithm(tuple* pqg, mpz_t* y, message_digest* m,sign_pair* rs){
 	 //cout << "not here 8" << endl;
-	 mpz_t w,z,u1,u2,v,M,tmp2,tmp1,r;
+	 mpz_t w,u1,u2,v,M,tmp2,tmp1,r;
 	  //cout << "not here 8" << endl;
-	  mpz_init(w);mpz_init(z);mpz_init(u1);mpz_init(u2);mpz_init(v);mpz_init(M);mpz_init(tmp1);mpz_init(tmp2);
+	 long z;
+	 int L = ((*m).M.size() * 8);
+	  mpz_init(w);mpz_init(u1);mpz_init(u2);mpz_init(v);mpz_init(M);mpz_init(tmp1);mpz_init(tmp2);
 	  mpz_init((*m).Mi);
 	  message_to_int(&(*m));
 	//1;
@@ -207,10 +209,12 @@ bool verification_algorithm(tuple* pqg, mpz_t* y, message_digest* m,sign_pair* r
 	// u2 = ((r')w) mod q.
 	// v  = (g^u1 y^u2 mod p)mod q
 	//cout << "not here 8" << endl;
-	mpz_set(w,inverse_value(&(*rs).s,&(*pqg).q).p);// mod q;
+	mpz_mod(w,inverse_value(&(*rs).s,&(*pqg).q).p,(*pqg).q);// mod q;
 	//cout << "not here 8" << endl;
-	mpz_set(z,(*m).Mi) ;
-	mpz_mul(u1, z,w);
+	//cout << "signature_invalid" << endl;
+	z = mpz_get_ui((*m).Mi) >> min(N,L);
+	gmp_printf("z=%Zd\n",z);
+	mpz_mul_ui(u1,w,z);
 	mpz_mod(u1,u1,(*pqg).q);
 	//gmp_printf("u1 %Zd\n", u1);
 	
@@ -249,14 +253,19 @@ return 1;
  	mpz_init(t);
  	mpz_sub_ui(t,(*pqg).p,1);
  	mpz_powm(tmp1,(*pqg).g,(*pqg).q,(*pqg).p);
+ 	//mpz_mod_ui(tmp2,(*pqg).g,1);
+ 	//gmp_printf("tmp=%Zd\n", tmp1);
+ 
 
  	if (mpz_probab_prime_p((*pqg).p,25) &&
  	mpz_probab_prime_p((*pqg).q,25) &&
- 	mpz_divisible_p((*pqg).q,t) &&
- 	mpz_cmp_ui((*pqg).g,1) &&
- 	!mpz_cmp_ui((*pqg).g,1)
+ 	mpz_divisible_p(t,(*pqg).q) &&
+ 	!mpz_cmp_ui(tmp1,1) &&
+ 	mpz_cmp_ui((*pqg).g,1)){
 
- 	){
+ 	
+
+ 	
  	cout << "valid_group" << endl;
  		//test för längd 
  	return 1;
@@ -295,7 +304,9 @@ int main(int argc, char *argv[]){
   	mpz_set_str(pqg.g,&line.c_str()[2],10);
   	//cout << &line.c_str()[2] << endl;
 
-  	isvalid(&pqg);
+  	if (!isvalid(&pqg)){
+  		return 0;
+  	}
 
   	getline (myfile,line);
   	if(strcmp(line.c_str(),"genkey") == 0){
