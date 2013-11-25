@@ -298,6 +298,9 @@ int main(int argc, char *argv[]){
   	isvalid(&pqg);
 
   	getline (myfile,line);
+  	cout << "Error" << endl;
+  	string haha = line.c_str();
+  	cout << "Error2" << endl;
   	if(strcmp(line.c_str(),"genkey") == 0){
 	  	//cout << "genkey" << endl;
 	  	int n;
@@ -368,10 +371,10 @@ int main(int argc, char *argv[]){
     // {
     //   cout << line << endl;
     // }
-    mpz_clear(pqg.p);
-  	mpz_clear(pqg.q);
-  	mpz_clear(pqg.g);
-    myfile.close();
+   //  mpz_clear(pqg.p);
+  	// mpz_clear(pqg.q);
+  	// mpz_clear(pqg.g);
+   //  myfile.close();
 
   }
    else cout << "Unable to open file"<< endl; 
