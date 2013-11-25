@@ -324,11 +324,13 @@ int main(int argc, char *argv[]){
   		while ( getline (myfile,line) )
     	{
       		getline (myfile,line);
-  			D.M = &line.c_str()[2];
+  			//D.M = &line.c_str()[2];
   			cout << (&line.c_str()[2]) << endl;
   			//signing_operation(pqg,xy,D);
       		
     	}
+    	mpz_clear(xy.y);
+  		mpz_clear(xy.x);
 
 	 }
 	else if(strcmp(line.c_str(),"verify") == 0){
