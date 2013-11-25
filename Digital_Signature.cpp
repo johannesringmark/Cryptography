@@ -4,7 +4,7 @@
 #include <cmath>
 #include <bitset>
 #include <cstdlib>
- 
+#include <cstring> 
 using namespace std;
 const int L=1024;
 const int N=160;
