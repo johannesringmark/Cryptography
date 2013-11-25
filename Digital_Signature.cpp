@@ -331,7 +331,7 @@ int main(int argc, char *argv[]){
     	}
     	mpz_clear(xy.y);
   		mpz_clear(xy.x);
-  		free(D);
+  		//free(D);
 
 	 }
 	else if(strcmp(line.c_str(),"verify") == 0){
