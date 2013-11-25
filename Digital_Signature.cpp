@@ -263,22 +263,22 @@ return 1;
 	return 0;
  }
 
-//int main(int argc, char *argv[]){
- int main(){
+int main(int argc, char *argv[]){
+ //int main(){
   tuple pqg;
    mpz_t z;
    mpz_t a;
    mpz_t y;
    string input;
-   cout <<" Enter file path "<< input;
-   cin << input;
+   //cout <<" Enter file path "<< input;
+   //cin << input;
 
   mpz_init(pqg.p);
   mpz_init(pqg.q);
   mpz_init(pqg.g);
     
   string line;
-  ifstream myfile (input);
+  ifstream myfile (argv[1]);
   if (myfile.is_open())
   {
   	getline (myfile,line);
