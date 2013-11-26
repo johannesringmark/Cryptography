@@ -39,27 +39,41 @@ typedef struct {
 
 key_pair genkey_pair(){
 	mpz_t rand_Num;
+	mpz_t rand_Num2;
     unsigned long int i, seed;
     gmp_randstate_t r_state;
-
+    key_pair pair;
     seed = 123456;
-
+    mpz_init(pair.x);
+    mpz_init(pair.y);
+    mpz_init(rand_Num2);
     gmp_randinit_default (r_state);
     gmp_randseed_ui(r_state, seed);
 
     mpz_init2(rand_Num,160);
-    for (int i = 0; i < 1 ; i++){
+    
+    for (int i = 0; i < 5 ; i++){
     	// fix size error
        mpz_urandomb(rand_Num,r_state,(N+1));
-       gmp_printf("x=%Zd\n", rand_Num);
-       mpz_urandomb(rand_Num,r_state,(N+1));
-   	   gmp_printf("y=%Zd\n", rand_Num);
-    }
+       
+       cout << "not here 1.1" << endl;
+       mpz_set(rand_Num2,rand_Num);
+       mpz_urandomb(rand_Num2,r_state,(N+1));
+   	   
 
+    }
+    gmp_printf("x=%Zd\n", rand_Num);
+    gmp_printf("y=%Zd\n", rand_Num2);
+    cout << "not here 1.2" << endl;
+    mpz_set(pair.x,rand_Num2);
+    mpz_set(pair.y,rand_Num);
+    cout << "not here 1.3" << endl;
     gmp_randclear(r_state);
     mpz_clear(rand_Num);
-	key_pair pair;
-	//nes = 
+    mpz_clear(rand_Num2);
+    cout << "not here 1.4" << endl;
+	
+	
 
 return	pair;
 }
@@ -69,23 +83,19 @@ m_inverse inverse_value(mpz_t* z,mpz_t* a){ //seems ok tested with the values fr
 	mpz_t i,j,y,y1,y2,rem,quotient,tmp;
 	m_inverse zinv;
 	mpz_init(zinv.p);
+
 	
 	if ( !(mpz_cmp(*a,*z) && mpz_cmp_si(*z,0))){
 		cout << "invalid arguments" << endl;
-		 //printf("a < r' %i\n", mpz_cmp(*a,*z));
-		// printf("0 < r' %i\n", mpz_cmp_si(*z,0));
 		zinv.valid = 0;
 		return zinv;
 	}
-	 //cout << "not here f1" << endl;
 	 mpz_init(i);mpz_init(j);mpz_init(y);mpz_init(y1);
 	 mpz_init(y2);mpz_init(rem); mpz_init(quotient);mpz_init(tmp);
-	 //cout << "not here f2" << endl;
 	mpz_set(i,*a);
 	mpz_set(j,*z);
 	mpz_set_ui(y2,0);
 	mpz_set_ui(y1,1);
-	 //cout << "not here f3" << endl;
 	do{
 		//quotient = floor((i+0.0)/(j+0.0));
 		mpz_div(quotient,i,j);
@@ -101,7 +111,6 @@ m_inverse inverse_value(mpz_t* z,mpz_t* a){ //seems ok tested with the values fr
 		mpz_set(y2,y1);
 		mpz_set(y1,y);
 	}while(mpz_cmp_si(j,0));
-	//cout << "not here f4" << endl; 
 		if (mpz_cmp_si(i,1) != 0){
 			cout << "Error2" << endl;
 			zinv.valid = 0;
@@ -109,25 +118,18 @@ m_inverse inverse_value(mpz_t* z,mpz_t* a){ //seems ok tested with the values fr
 		};
 	zinv.valid = 1;
 	//zinv.p = (y2 % a);
-	//cout << "not here f5" << endl;
 	mpz_mod (zinv.p, y2, *a);
-	//cout << "not here f6" << endl;
 	mpz_clear(i);mpz_clear(j);mpz_clear(y);mpz_clear(y1);
 	 mpz_clear(y2);mpz_clear(rem); mpz_clear(quotient);mpz_clear(tmp);
-	 //cout << "not here f7" << endl;
 	return zinv;
 }
  int message_to_int (message_digest* M){ // fucked upp as fuck
-	//cout << "not here 1" << endl;
 	int n = ((*M).M.length() + 1);
 	char* p = new char[n];
-	//cout << "not here 2" << endl;
 	strncpy(p,(*M).M.c_str(), (*M).M.length());
-	//cout << "not here 3" << endl;
 	mpz_t C;
 	mpz_init(C);
 	mpz_init((*M).Mi);
-	//cout << "not here 4" << endl;
 	int tmp,tmp2;
 	
 	for(int i = 1;i <= n; i++){
@@ -146,43 +148,56 @@ m_inverse inverse_value(mpz_t* z,mpz_t* a){ //seems ok tested with the values fr
 	//cout << "not here 6" << endl;
 	mpz_set((*M).Mi,C);
 	//cout << "not here 7" << endl;
-	gmp_printf("M=%Zd\n", (*M).Mi);
+	//gmp_printf("M=%Zd\n", (*M).Mi);
 	mpz_clear(C);
 	//cout << "not here 6" << endl;
 return 0;
 }
 
-sign_pair signing_operation(tuple pqg,key_pair a,message_digest m){
+int signing_operation(tuple* pqg,key_pair (*a),message_digest* m){
 	 mpz_t r,s,k,k_inv,tmp;
-	 message_to_int(&m);
+	 cout << "not here 1" << endl;
+	 message_to_int(&(*m));
+	 cout << "not here 2" << endl;
+	 key_pair kp = genkey_pair();
+	 cout << "not here 3" << endl;
 	 long z;
-	 int L = (m.M.size() * 8);  
-	 mpz_init(r);mpz_init(s);mpz_init(k);mpz_init(k_inv);mpz_init(tmp);
-	//generate k
-	mpz_set(k_inv,inverse_value(&k,&pqg.q).p);
+	 int L = ((*m).M.size() * 8); 
+	 cout << "not here 4" << endl;
 
+	 mpz_init(r);mpz_init(s);mpz_init(k);mpz_init(k_inv);mpz_init(tmp);
+	 mpz_set(k,kp.y);
+	 cout << "not here 5" << endl;
+	//generate k
+	mpz_set(k_inv,inverse_value(&k,&(*pqg).q).p);
+	cout << "not here 6" << endl;
 	//r = g^k mod p
-	mpz_powm(r,pqg.g,k,pqg.q);
-	
+	mpz_powm(r,(*pqg).g,k,(*pqg).q);
+	cout << "not here 1" << endl;
 
 	//z = the leftmost min(N,outlen) bits of hash(M) 
-	z = mpz_get_ui(m.Mi) >> min(N,L);
+	z = mpz_get_ui((*m).Mi); //>> min(N,L);
 	//s = (k^-1)(z+xr) mod q
-//mpz_mul(tmp,a.x,r);
+	mpz_mul(tmp,(*a).x,r);
+	cout << "not here 7" << endl;
 	mpz_add_ui(tmp,tmp,z);
-	//mpz_mul(s,kinv,tmp);
+	cout << "not here 8" << endl;
+	mpz_mul(s,k_inv,tmp);
+	//cout << "not here 9" << endl;
+	mpz_mod(s,s,(*pqg).q);
 
 	// 
-	gmp_printf("M=%Zd\n", r);
-	gmp_printf("M=%Zd\n", s);
-	 sign_pair hej;
+	gmp_printf("r=%Zd\n", r);
+	gmp_printf("s=%Zd\n", s);
+
+	mpz_clear(r);mpz_clear(s);mpz_clear(k);mpz_clear(k_inv);mpz_clear(tmp);
 	 //set(hej.x)
-	return hej;
+	return 0;
  }
 bool verification_algorithm(tuple* pqg, mpz_t* y, message_digest* m,sign_pair* rs){
-	 //cout << "not here 8" << endl;
+	 cout << "not here 1" << endl;
 	 mpz_t w,u1,u2,v,M,tmp2,tmp1,r;
-	  //cout << "not here 8" << endl;
+	  cout << "not here 2" << endl;
 	 long z;
 	 int L = ((*m).M.size() * 8);
 	  mpz_init(w);mpz_init(u1);mpz_init(u2);mpz_init(v);mpz_init(M);mpz_init(tmp1);mpz_init(tmp2);
@@ -191,12 +206,12 @@ bool verification_algorithm(tuple* pqg, mpz_t* y, message_digest* m,sign_pair* r
 	//1;
 
 	//check 0 < r' < q and 0 < s' < q; if either condition is violated,
-	if(!(mpz_cmp_ui((*rs).r,0) && mpz_cmp((*pqg).q,(*rs).r) && mpz_cmp_ui((*rs).s,0) && mpz_cmp((*pqg).q,(*rs).s)) ){
-		cout << "signature_invalid" << endl;
-		// printf("0 < r' %i\n", mpz_cmp_ui(rs.r,0));
-		// printf("0 < s' %i\n", mpz_cmp(pqg.q,rs.r));
-		// printf("r' < q %i\n", mpz_cmp_ui(rs.s,0));
-		 //printf("s' < q %i\n", mpz_cmp((*pqg).q,(*rs).s));
+	if(!((mpz_cmp_ui((*rs).r,0)> 0) && (mpz_cmp((*pqg).q,(*rs).r)> 0) && (mpz_cmp_ui((*rs).s,0) > 0) && (mpz_cmp((*pqg).q,(*rs).s)> 0)) ){
+		cout << "signature_invalid 1" << endl;
+		 printf("0 < r' %i\n", mpz_cmp_ui((*rs).r,0));
+		 printf("0 < s' %i\n", mpz_cmp_ui((*rs).s,0));
+		 printf("r' < q %i\n", mpz_cmp((*pqg).q,(*rs).r));
+		 printf("s' < q %i\n", mpz_cmp((*pqg).q,(*rs).s));
 		
 		return 0;
 		
@@ -210,15 +225,18 @@ bool verification_algorithm(tuple* pqg, mpz_t* y, message_digest* m,sign_pair* r
 	// v  = (g^u1 y^u2 mod p)mod q
 	//cout << "not here 8" << endl;
 	mpz_mod(w,inverse_value(&(*rs).s,&(*pqg).q).p,(*pqg).q);// mod q;
-	//cout << "not here 8" << endl;
+	cout << "not here 3" << endl;
 	//cout << "signature_invalid" << endl;
-	z = mpz_get_ui((*m).Mi) >> min(N,L);
-	gmp_printf("z=%Zd\n",z);
+	z = mpz_get_ui((*m).Mi);
+	cout << "not here 4" << endl;
+	//gmp_printf("z=%Zd\n",z);
+	cout << "not here 5" << endl;
 	mpz_mul_ui(u1,w,z);
+	cout << "not here 6" << endl;
 	mpz_mod(u1,u1,(*pqg).q);
 	//gmp_printf("u1 %Zd\n", u1);
 	
-	//cout << "not here 9" << endl;
+	cout << "not here 9" << endl;
 	mpz_mul(u2,(*rs).r,w);
 	mpz_mod(u2,u2,(*pqg).q);
 	//gmp_printf("u2 %Zd\n", u2);
@@ -239,7 +257,7 @@ bool verification_algorithm(tuple* pqg, mpz_t* y, message_digest* m,sign_pair* r
 		gmp_printf("v=%Zd\n", v);
 		//gmp_printf("M=%Zd\n", s.Mi);
 		 gmp_printf("r=%Zd\n", (*rs).r);
-		cout << "signature_invalid" << endl;
+		cout << "signature_invalid 2" << endl;
 		return 0;
 	}
 	cout << "signature_valid" << endl;
@@ -287,6 +305,7 @@ int main(int argc, char *argv[]){
   mpz_init(pqg.p);
   mpz_init(pqg.q);
   mpz_init(pqg.g);
+  
     
   string line;
   ifstream myfile (argv[1]);
@@ -294,15 +313,15 @@ int main(int argc, char *argv[]){
   {
   	getline (myfile,line);
   	mpz_set_str(pqg.p,&line.c_str()[2],10);
-  	//cout << (&line.c_str()[2]) << endl;
+  	cout <<"p="<< (&line.c_str()[2]) << endl;
 
 	getline (myfile,line);
   	mpz_set_str(pqg.q,&line.c_str()[2],10);
-  	//cout << &line.c_str()[2] << endl;
+  	cout <<"q="<< &line.c_str()[2] << endl;
 
   	getline (myfile,line);
   	mpz_set_str(pqg.g,&line.c_str()[2],10);
-  	//cout << &line.c_str()[2] << endl;
+  	cout <<"g="<< &line.c_str()[2] << endl;
 
   	if (!isvalid(&pqg)){
   		return 0;
@@ -323,25 +342,26 @@ int main(int argc, char *argv[]){
 	else if(strcmp(line.c_str(),"sign") == 0){
 	   	message_digest D;
 	   	key_pair xy;
+	   	mpz_init(xy.y);
+	   	mpz_init(xy.x);
 	   	cout << "sign" << endl;
 	   	getline (myfile,line);
   		mpz_set_str(xy.x,&line.c_str()[2],10);
-  		cout << (&line.c_str()[2]) << endl;
+  		//cout << (&line.c_str()[2]) << endl;
   		//free(line)
 		getline (myfile,line);
   		mpz_set_str(xy.y,&line.c_str()[2],10);
-  		cout << &line.c_str()[2] << endl;
+  		//cout << &line.c_str()[2] << endl;
 
   		while ( getline (myfile,line) )
     	{
-      		getline (myfile,line);
-  			//D.M = &line.c_str()[2];
-  			cout << (&line.c_str()[2]) << endl;
-  			//signing_operation(pqg,xy,D);
+  			D.M = &line.c_str()[2];
+  			//cout << (&line.c_str()[2]) << endl;
+  			signing_operation(&pqg,&xy,&D);
       		
     	}
-    	mpz_clear(xy.y);
-  		mpz_clear(xy.x);
+    	//mpz_clear(xy.y);
+  		//mpz_clear(xy.x);
   		//free(D);
 
 	 }
@@ -352,29 +372,30 @@ int main(int argc, char *argv[]){
 		mpz_init(xy.y);
 		mpz_init(rs.s);
 		mpz_init(rs.r);
-		//cout << "verify" << endl;
+		cout << "verify" << endl;
 		getline (myfile,line);
   		mpz_set_str(xy.y,&line.c_str()[2],10);
-  		//cout << (&line.c_str()[2]) << endl;
+  		cout << "y= "<< (&line.c_str()[2]) << endl;
 
   		while ( getline (myfile,line) )
     	{
-    		getline (myfile,line);
   			D.M = &line.c_str()[2];
-  			//cout << (&line.c_str()[2]) << endl;
+  			cout << "M= "<< (&line.c_str()[2]) << endl;
 
     		getline (myfile,line);
   			mpz_set_str(rs.r,&line.c_str()[2],10);
-  			//cout << (&line.c_str()[2]) << endl;
+  			cout << "r= " << (&line.c_str()[2]) << endl;
 
   			getline (myfile,line);
   			mpz_set_str(rs.s,&line.c_str()[2],10);
-  			//cout << (&line.c_str()[2]) << endl;
+  			cout << "s= " << (&line.c_str()[2]) << endl;
+  			
       		verification_algorithm(&pqg, &xy.y, &D,&rs);
+      		cout << "next" << endl;
     	}
-  		mpz_clear(xy.y);
-  		mpz_clear(rs.r);
-  		mpz_clear(rs.s);
+  		//mpz_clear(xy.y);
+  		//mpz_clear(rs.r);
+  		//mpz_clear(rs.s);
 	};
 
 
