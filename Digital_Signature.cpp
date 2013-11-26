@@ -55,26 +55,16 @@ key_pair genkey_pair(){
     for (int i = 0; i < 5 ; i++){
     	// fix size error
        mpz_urandomb(rand_Num,r_state,(N+1));
-       
-       cout << "not here 1.1" << endl;
        mpz_set(rand_Num2,rand_Num);
        mpz_urandomb(rand_Num2,r_state,(N+1));
-   	   
-
     }
-    gmp_printf("x=%Zd\n", rand_Num);
-    gmp_printf("y=%Zd\n", rand_Num2);
-    cout << "not here 1.2" << endl;
+    //gmp_printf("x=%Zd\n", rand_Num);
+    //gmp_printf("y=%Zd\n", rand_Num2);
     mpz_set(pair.x,rand_Num2);
     mpz_set(pair.y,rand_Num);
-    cout << "not here 1.3" << endl;
     gmp_randclear(r_state);
     mpz_clear(rand_Num);
     mpz_clear(rand_Num2);
-    cout << "not here 1.4" << endl;
-	
-	
-
 return	pair;
 }
 
@@ -132,7 +122,7 @@ m_inverse inverse_value(mpz_t* z,mpz_t* a){ //seems ok tested with the values fr
 	mpz_init((*M).Mi);
 	int tmp,tmp2;
 	
-	for(int i = 1;i <= n; i++){
+	for(int i = 1;i <= N; i++){
 		for(int t = 0; t < 8;t++){
 		int a = (2^(n-i)); 
 		bitset<8> b(p[i]);
@@ -140,50 +130,28 @@ m_inverse inverse_value(mpz_t* z,mpz_t* a){ //seems ok tested with the values fr
 		//cout << b[t];
 		}
   	}
-		
-	
-	//free(p);
-	//cout << "not here 5" << endl;
 	mpz_add_ui(C,C,tmp);
-	//cout << "not here 6" << endl;
 	mpz_set((*M).Mi,C);
-	//cout << "not here 7" << endl;
-	//gmp_printf("M=%Zd\n", (*M).Mi);
 	mpz_clear(C);
-	//cout << "not here 6" << endl;
 return 0;
 }
 
 int signing_operation(tuple* pqg,key_pair (*a),message_digest* m){
 	 mpz_t r,s,k,k_inv,tmp;
-	 cout << "not here 1" << endl;
 	 message_to_int(&(*m));
-	 cout << "not here 2" << endl;
 	 key_pair kp = genkey_pair();
-	 cout << "not here 3" << endl;
 	 long z;
-	 int L = ((*m).M.size() * 8); 
-	 cout << "not here 4" << endl;
-
 	 mpz_init(r);mpz_init(s);mpz_init(k);mpz_init(k_inv);mpz_init(tmp);
 	 mpz_set(k,kp.y);
-	 cout << "not here 5" << endl;
-	//generate k
 	mpz_set(k_inv,inverse_value(&k,&(*pqg).q).p);
-	cout << "not here 6" << endl;
-	//r = g^k mod p
 	mpz_powm(r,(*pqg).g,k,(*pqg).q);
-	cout << "not here 1" << endl;
 
 	//z = the leftmost min(N,outlen) bits of hash(M) 
-	z = mpz_get_ui((*m).Mi); //>> min(N,L);
+	z = mpz_get_ui((*m).Mi);
 	//s = (k^-1)(z+xr) mod q
 	mpz_mul(tmp,(*a).x,r);
-	cout << "not here 7" << endl;
 	mpz_add_ui(tmp,tmp,z);
-	cout << "not here 8" << endl;
 	mpz_mul(s,k_inv,tmp);
-	//cout << "not here 9" << endl;
 	mpz_mod(s,s,(*pqg).q);
 
 	// 
@@ -191,31 +159,32 @@ int signing_operation(tuple* pqg,key_pair (*a),message_digest* m){
 	gmp_printf("s=%Zd\n", s);
 
 	mpz_clear(r);mpz_clear(s);mpz_clear(k);mpz_clear(k_inv);mpz_clear(tmp);
-	 //set(hej.x)
 	return 0;
  }
 bool verification_algorithm(tuple* pqg, mpz_t* y, message_digest* m,sign_pair* rs){
-	 cout << "not here 1" << endl;
-	 mpz_t w,u1,u2,v,M,tmp2,tmp1,r;
-	  cout << "not here 2" << endl;
+	 mpz_t w,u1,u2,v,M,tmp2,tmp1,r,a1,a2;
 	 long z;
-	 int L = ((*m).M.size() * 8);
 	  mpz_init(w);mpz_init(u1);mpz_init(u2);mpz_init(v);mpz_init(M);mpz_init(tmp1);mpz_init(tmp2);
 	  mpz_init((*m).Mi);
 	  message_to_int(&(*m));
+	  
 	//1;
 
 	//check 0 < r' < q and 0 < s' < q; if either condition is violated,
 	if(!((mpz_cmp_ui((*rs).r,0)> 0) && (mpz_cmp((*pqg).q,(*rs).r)> 0) && (mpz_cmp_ui((*rs).s,0) > 0) && (mpz_cmp((*pqg).q,(*rs).s)> 0)) ){
-		cout << "signature_invalid 1" << endl;
-		 printf("0 < r' %i\n", mpz_cmp_ui((*rs).r,0));
-		 printf("0 < s' %i\n", mpz_cmp_ui((*rs).s,0));
-		 printf("r' < q %i\n", mpz_cmp((*pqg).q,(*rs).r));
-		 printf("s' < q %i\n", mpz_cmp((*pqg).q,(*rs).s));
+		cout << "signature_invalid" << 1 << endl;
 		
 		return 0;
 		
 	} 
+
+
+	//Following code tests if the inverse is computed accuartly
+	//mpz_init(a1);
+	//mpz_init(a2);
+	//mpz_mul(a1,(inverse_value(&(*rs).s,&(*pqg).q).p),(*rs).s);
+	//mpz_mod(a1,a1,(*pqg).q);
+	//gmp_printf("e %Zd\n", a1);
 	
 	//2;
 	// w = s'^-1 mod q
@@ -223,20 +192,16 @@ bool verification_algorithm(tuple* pqg, mpz_t* y, message_digest* m,sign_pair* r
 	// u1 = (zw) mod q
 	// u2 = ((r')w) mod q.
 	// v  = (g^u1 y^u2 mod p)mod q
-	//cout << "not here 8" << endl;
-	mpz_mod(w,inverse_value(&(*rs).s,&(*pqg).q).p,(*pqg).q);// mod q;
-	cout << "not here 3" << endl;
-	//cout << "signature_invalid" << endl;
+
+	mpz_mod(w,inverse_value(&(*rs).s,&(*pqg).q).p,(*pqg).q);
+	//gmp_printf("w %Zd\n", w);
 	z = mpz_get_ui((*m).Mi);
-	cout << "not here 4" << endl;
-	//gmp_printf("z=%Zd\n",z);
-	cout << "not here 5" << endl;
+
+
+	//cout << "z=" << z << endl;
 	mpz_mul_ui(u1,w,z);
-	cout << "not here 6" << endl;
 	mpz_mod(u1,u1,(*pqg).q);
 	//gmp_printf("u1 %Zd\n", u1);
-	
-	cout << "not here 9" << endl;
 	mpz_mul(u2,(*rs).r,w);
 	mpz_mod(u2,u2,(*pqg).q);
 	//gmp_printf("u2 %Zd\n", u2);
@@ -245,19 +210,15 @@ bool verification_algorithm(tuple* pqg, mpz_t* y, message_digest* m,sign_pair* r
 	mpz_powm(tmp1,(*pqg).g,u1,(*pqg).p);
 	mpz_powm(tmp2,(*y),u2,(*pqg).p);
 	mpz_mul(v,tmp1,tmp2);
-	//gmp_printf("v %Zd\n", v);
 	mpz_mod(v,v,(*pqg).p);
 	mpz_mod(v,v,(*pqg).q);
 
 	//3;
 	//if v = r', then signarture is verified else return invalid 
 	if (mpz_cmp(v,(*rs).r) != 0){
-		//mzp_t = 
-		//int 
-		gmp_printf("v=%Zd\n", v);
-		//gmp_printf("M=%Zd\n", s.Mi);
-		 gmp_printf("r=%Zd\n", (*rs).r);
-		cout << "signature_invalid 2" << endl;
+		//gmp_printf("v=%Zd\n", v);
+		 //gmp_printf("r=%Zd\n", (*rs).r);
+		cout << "signature_invalid" <<  2 << endl;
 		return 0;
 	}
 	cout << "signature_valid" << endl;
@@ -271,21 +232,13 @@ return 1;
  	mpz_init(t);
  	mpz_sub_ui(t,(*pqg).p,1);
  	mpz_powm(tmp1,(*pqg).g,(*pqg).q,(*pqg).p);
- 	//mpz_mod_ui(tmp2,(*pqg).g,1);
- 	//gmp_printf("tmp=%Zd\n", tmp1);
- 
-
  	if (mpz_probab_prime_p((*pqg).p,25) &&
  	mpz_probab_prime_p((*pqg).q,25) &&
  	mpz_divisible_p(t,(*pqg).q) &&
  	!mpz_cmp_ui(tmp1,1) &&
  	mpz_cmp_ui((*pqg).g,1)){
-
- 	
-
- 	
  	cout << "valid_group" << endl;
- 		//test för längd 
+ 		//test för längd saknas 
  	return 1;
 	}
 	cout << "invalid_group" << endl;
@@ -298,30 +251,28 @@ int main(int argc, char *argv[]){
    mpz_t z;
    mpz_t a;
    mpz_t y;
-   string input;
+   //string input;
    //cout <<" Enter file path "<< input;
    //cin << input;
-
   mpz_init(pqg.p);
   mpz_init(pqg.q);
-  mpz_init(pqg.g);
-  
-    
+  mpz_init(pqg.g); 
   string line;
   ifstream myfile (argv[1]);
+
   if (myfile.is_open())
   {
   	getline (myfile,line);
   	mpz_set_str(pqg.p,&line.c_str()[2],10);
-  	cout <<"p="<< (&line.c_str()[2]) << endl;
+  	//cout <<"p="<< (&line.c_str()[2]) << endl;
 
 	getline (myfile,line);
   	mpz_set_str(pqg.q,&line.c_str()[2],10);
-  	cout <<"q="<< &line.c_str()[2] << endl;
+  	//cout <<"q="<< &line.c_str()[2] << endl;
 
   	getline (myfile,line);
   	mpz_set_str(pqg.g,&line.c_str()[2],10);
-  	cout <<"g="<< &line.c_str()[2] << endl;
+  	//cout <<"g="<< &line.c_str()[2] << endl;
 
   	if (!isvalid(&pqg)){
   		return 0;
@@ -335,7 +286,9 @@ int main(int argc, char *argv[]){
 	  	n = atoi(&line.c_str()[2]);
 	  	//cout << n << endl;
 	  	for(int i = 0; i < n;i++){
-	  		genkey_pair();
+	  		key_pair a = genkey_pair();
+	  		gmp_printf("r=%Zd\n", a.x);
+	  		gmp_printf("s=%Zd\n", a.y);
 	  	}
 	
 	}
@@ -351,18 +304,12 @@ int main(int argc, char *argv[]){
   		//free(line)
 		getline (myfile,line);
   		mpz_set_str(xy.y,&line.c_str()[2],10);
-  		//cout << &line.c_str()[2] << endl;
-
   		while ( getline (myfile,line) )
     	{
   			D.M = &line.c_str()[2];
-  			//cout << (&line.c_str()[2]) << endl;
   			signing_operation(&pqg,&xy,&D);
       		
     	}
-    	//mpz_clear(xy.y);
-  		//mpz_clear(xy.x);
-  		//free(D);
 
 	 }
 	else if(strcmp(line.c_str(),"verify") == 0){
@@ -375,34 +322,26 @@ int main(int argc, char *argv[]){
 		cout << "verify" << endl;
 		getline (myfile,line);
   		mpz_set_str(xy.y,&line.c_str()[2],10);
-  		cout << "y= "<< (&line.c_str()[2]) << endl;
+  		//cout << "y= "<< (&line.c_str()[2]) << endl;
 
   		while ( getline (myfile,line) )
     	{
   			D.M = &line.c_str()[2];
-  			cout << "M= "<< (&line.c_str()[2]) << endl;
+  			//cout << "M= "<< (&line.c_str()[2]) << endl;
 
     		getline (myfile,line);
   			mpz_set_str(rs.r,&line.c_str()[2],10);
-  			cout << "r= " << (&line.c_str()[2]) << endl;
+  			//cout << "r= " << (&line.c_str()[2]) << endl;
 
   			getline (myfile,line);
   			mpz_set_str(rs.s,&line.c_str()[2],10);
-  			cout << "s= " << (&line.c_str()[2]) << endl;
+  			//cout << "s= " << (&line.c_str()[2]) << endl;
   			
       		verification_algorithm(&pqg, &xy.y, &D,&rs);
-      		cout << "next" << endl;
+      		//cout << "next" << endl;
     	}
-  		//mpz_clear(xy.y);
-  		//mpz_clear(rs.r);
-  		//mpz_clear(rs.s);
+
 	};
-
-
-    // while ( getline (myfile,line) )
-    // {
-    //   cout << line << endl;
-    // }
     mpz_clear(pqg.p);
   	mpz_clear(pqg.q);
   	mpz_clear(pqg.g);
