@@ -68,7 +68,7 @@ key_pair genkey_pair(){
 return	pair;
 }
 
-//C.1 Computation of the Inverse Value
+//C.1 Computation of the Inverse Value;
 m_inverse inverse_value(mpz_t* z,mpz_t* a){ //seems ok tested with the values from assignment 2
 	mpz_t i,j,y,y1,y2,rem,quotient,tmp;
 	m_inverse zinv;
@@ -280,7 +280,7 @@ int main(int argc, char *argv[]){
 
   	getline (myfile,line);
   	if(strcmp(line.c_str(),"genkey") == 0){
-	  	//cout << "genkey" << endl;
+	  	//cout << "genkey" << endl
 	  	int n;
 	  	getline (myfile,line);
 	  	n = atoi(&line.c_str()[2]);
