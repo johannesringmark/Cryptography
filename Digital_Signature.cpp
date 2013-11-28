@@ -5,6 +5,7 @@
 #include <bitset>
 #include <cstdlib>
 #include <cstring> 
+#include <sstream>
 using namespace std;
 const int L=1024;
 const int N=160;
@@ -69,11 +70,11 @@ return	pair;
 }
 
 //C.1 Computation of the Inverse Value;
-m_inverse inverse_value(mpz_t* z,mpz_t* a){ //seems ok tested with the values from assignment 2
+m_inverse inverse_value(mpz_t* z,mpz_t* a){ //from assignment 2
 	mpz_t i,j,y,y1,y2,rem,quotient,tmp;
 	m_inverse zinv;
 	mpz_init(zinv.p);
-
+	//commits is fun!
 	
 	if ( !(mpz_cmp(*a,*z) && mpz_cmp_si(*z,0))){
 		cout << "invalid arguments" << endl;
@@ -100,6 +101,7 @@ m_inverse inverse_value(mpz_t* z,mpz_t* a){ //seems ok tested with the values fr
 		mpz_set(j,rem);
 		mpz_set(y2,y1);
 		mpz_set(y1,y);
+
 	}while(mpz_cmp_si(j,0));
 		if (mpz_cmp_si(i,1) != 0){
 			cout << "Error2" << endl;
@@ -121,36 +123,93 @@ m_inverse inverse_value(mpz_t* z,mpz_t* a){ //seems ok tested with the values fr
 	mpz_init(C);
 	mpz_init((*M).Mi);
 	int tmp,tmp2;
-	
-	for(int i = 1;i <= N; i++){
+	ostringstream ss;
+	for(int i = 0;i < N; i++){
 		for(int t = 0; t < 8;t++){
 		int a = (2^(n-i)); 
 		bitset<8> b(p[i]);
-		tmp = tmp + (a * (b[t] + 0));
-		//cout << b[t];
+		ss  << b[t];
+		
+
 		}
   	}
+  	int message_to_int (message_digest* M){ // fucked upp as fuck
+	int n = ((*M).M.length() + 1);
+	char* p = new char[n];
+	strncpy(p,(*M).M.c_str(), (*M).M.length());
+	mpz_t C;
+	mpz_init(C);
+	mpz_init((*M).Mi);
+	int tmp,tmp2;
+	ostringstream ss;
+	for(int i = 0;i < N; i++){
+		for(int t = 0; t < 8;t++){
+		int a = (2^(n-i)); 
+		bitset<8> b(p[i]);
+		ss  << b[t];
+		
+
+		}
+  	}
+  	string bitstring = ss.str();
+  	ss.flush();
+  	for(int i = 0;i < N; i++){
+  		if (bitstring.c_str()[i] == '1'){
+  			tmp = tmp + (2^(N-i));
+  		}
+  		//cout << bitstring.c_str()[i] <<endl;
+		}
+  	
+
+  	//mpz_set_str(C,&ss.str().c_str()[0],10);
 	mpz_add_ui(C,C,tmp);
 	mpz_set((*M).Mi,C);
 	mpz_clear(C);
 return 0;
 }
+}
+int int_to_message (message_digest* M){ // fucked upp as fuck
+	char* p = new char[n];
+	mpz_t D;
+	mpz_init(D);
+	string mess = "";
+	int tmp,tmp2;
+	ostringstream ss;
+
+	for(int i = 0;i < N; i++){
+		for(int t = 0; t < 8;t++){
+		int a = (2^(n-i)); 
+		bitset<8> b(p[i]);
+		ss  << b[t];
+		
+
+		}
+  	}
+  }
+}
 
 int signing_operation(tuple* pqg,key_pair (*a),message_digest* m){
 	 mpz_t r,s,k,k_inv,tmp;
 	 message_to_int(&(*m));
-	 key_pair kp = genkey_pair();
+	 key_pair kp;// = genkey_pair();
 	 long z;
 	 mpz_init(r);mpz_init(s);mpz_init(k);mpz_init(k_inv);mpz_init(tmp);
 	 mpz_set(k,kp.y);
+	 mpz_set_ui(k,3);
+	 gmp_printf("k%Zd\n", k);
 	mpz_set(k_inv,inverse_value(&k,&(*pqg).q).p);
-	mpz_powm(r,(*pqg).g,k,(*pqg).q);
+	gmp_printf("kinv=%Zd\n", k_inv);
+	mpz_powm(r,(*pqg).g,k,(*pqg).p);
+	mpz_mod(r,r,(*pqg).q);
 
 	//z = the leftmost min(N,outlen) bits of hash(M) 
 	z = mpz_get_ui((*m).Mi);
 	//s = (k^-1)(z+xr) mod q
 	mpz_mul(tmp,(*a).x,r);
+	gmp_printf("tmp=%Zd\n", tmp);
+	gmp_printf("z=%Zd\n", (*m).Mi);
 	mpz_add_ui(tmp,tmp,z);
+gmp_printf("tmp=%Zd\n", tmp);
 	mpz_mul(s,k_inv,tmp);
 	mpz_mod(s,s,(*pqg).q);
 
@@ -196,7 +255,7 @@ bool verification_algorithm(tuple* pqg, mpz_t* y, message_digest* m,sign_pair* r
 	mpz_mod(w,inverse_value(&(*rs).s,&(*pqg).q).p,(*pqg).q);
 	//gmp_printf("w %Zd\n", w);
 	z = mpz_get_ui((*m).Mi);
-
+	gmp_printf("z=%Zd\n", (*m).Mi);
 
 	//cout << "z=" << z << endl;
 	mpz_mul_ui(u1,w,z);
@@ -216,8 +275,8 @@ bool verification_algorithm(tuple* pqg, mpz_t* y, message_digest* m,sign_pair* r
 	//3;
 	//if v = r', then signarture is verified else return invalid 
 	if (mpz_cmp(v,(*rs).r) != 0){
-		//gmp_printf("v=%Zd\n", v);
-		 //gmp_printf("r=%Zd\n", (*rs).r);
+		gmp_printf("v=%Zd\n", v);
+		 gmp_printf("r=%Zd\n", (*rs).r);
 		cout << "signature_invalid" <<  2 << endl;
 		return 0;
 	}
@@ -252,37 +311,35 @@ int main(int argc, char *argv[]){
    mpz_t a;
    mpz_t y;
    //string input;
-   //cout <<" Enter file path "<< input;
-   //cin << input;
+   string line;  
   mpz_init(pqg.p);
   mpz_init(pqg.q);
   mpz_init(pqg.g); 
-  string line;
-  ifstream myfile (argv[1]);
+  //ifstream myfile(line);//argv[1]);
 
-  if (myfile.is_open())
+  if (1)//cin.is_open())
   {
-  	getline (myfile,line);
+  	getline (cin,line);
   	mpz_set_str(pqg.p,&line.c_str()[2],10);
   	//cout <<"p="<< (&line.c_str()[2]) << endl;
 
-	getline (myfile,line);
+	getline (cin,line);
   	mpz_set_str(pqg.q,&line.c_str()[2],10);
   	//cout <<"q="<< &line.c_str()[2] << endl;
 
-  	getline (myfile,line);
+  	getline (cin,line);
   	mpz_set_str(pqg.g,&line.c_str()[2],10);
   	//cout <<"g="<< &line.c_str()[2] << endl;
 
-  	if (!isvalid(&pqg)){
-  		return 0;
-  	}
+  	// if (!isvalid(&pqg)){
+  	// 	return 0;
+  	// }
 
-  	getline (myfile,line);
+  	getline (cin,line);
   	if(strcmp(line.c_str(),"genkey") == 0){
 	  	//cout << "genkey" << endl
 	  	int n;
-	  	getline (myfile,line);
+	  	getline (cin,line);
 	  	n = atoi(&line.c_str()[2]);
 	  	//cout << n << endl;
 	  	for(int i = 0; i < n;i++){
@@ -298,13 +355,13 @@ int main(int argc, char *argv[]){
 	   	mpz_init(xy.y);
 	   	mpz_init(xy.x);
 	   	cout << "sign" << endl;
-	   	getline (myfile,line);
+	   	getline (cin,line);
   		mpz_set_str(xy.x,&line.c_str()[2],10);
   		//cout << (&line.c_str()[2]) << endl;
   		//free(line)
-		getline (myfile,line);
+		getline (cin,line);
   		mpz_set_str(xy.y,&line.c_str()[2],10);
-  		while ( getline (myfile,line) )
+  		while ( getline (cin,line) )
     	{
   			D.M = &line.c_str()[2];
   			signing_operation(&pqg,&xy,&D);
@@ -320,20 +377,20 @@ int main(int argc, char *argv[]){
 		mpz_init(rs.s);
 		mpz_init(rs.r);
 		cout << "verify" << endl;
-		getline (myfile,line);
+		getline (cin,line);
   		mpz_set_str(xy.y,&line.c_str()[2],10);
   		//cout << "y= "<< (&line.c_str()[2]) << endl;
 
-  		while ( getline (myfile,line) )
+  		while ( getline (cin,line) )
     	{
   			D.M = &line.c_str()[2];
   			//cout << "M= "<< (&line.c_str()[2]) << endl;
 
-    		getline (myfile,line);
+    		getline (cin,line);
   			mpz_set_str(rs.r,&line.c_str()[2],10);
   			//cout << "r= " << (&line.c_str()[2]) << endl;
 
-  			getline (myfile,line);
+  			getline (cin,line);
   			mpz_set_str(rs.s,&line.c_str()[2],10);
   			//cout << "s= " << (&line.c_str()[2]) << endl;
   			
@@ -345,7 +402,7 @@ int main(int argc, char *argv[]){
     mpz_clear(pqg.p);
   	mpz_clear(pqg.q);
   	mpz_clear(pqg.g);
-    myfile.close();
+   // myfile.close();
 
   }
    else cout << "Unable to open file"<< endl; 
