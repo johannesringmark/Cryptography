@@ -118,7 +118,7 @@ m_inverse inverse_value(mpz_t* z,mpz_t* a){ //from assignment 2
 
 int signing_operation(tuple* pqg,key_pair (*a),message_digest* m){
 	 mpz_t r,s,k,k_inv,z,tmp;
-	 key_pair kp;// = genkey_pair();
+	 key_pair kp = genkey_pair();
 	 
 	 mpz_init(r);mpz_init(s);mpz_init(k);mpz_init(k_inv);mpz_init(tmp);mpz_init(z);
 	 mpz_set(k,kp.y);
@@ -301,7 +301,7 @@ int main(int argc, char *argv[]){
   		while ( getline (cin,line) )
     	{
   			D.M = &line.c_str()[2];
-  			
+
   			signing_operation(&pqg,&xy,&D);
   			cout << "next" << endl;	
     	}
