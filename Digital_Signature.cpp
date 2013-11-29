@@ -6,9 +6,12 @@
 #include <cstdlib>
 #include <cstring> 
 #include <sstream>
+#include <ctime>
 using namespace std;
+//#macros
 const int L = 1024;
 const int N = 160;
+
 
 typedef struct{
 	mpz_t p;
@@ -37,34 +40,40 @@ typedef struct {
 }message_digest;
 
 
-key_pair genkey_pair(){
-	mpz_t rand_Num;
-	mpz_t rand_Num2;
-    unsigned long int i, seed;
-    gmp_randstate_t r_state;
-    key_pair pair;
-    seed = 123456;
-    mpz_init(pair.x);
-    mpz_init(pair.y);
-    mpz_init(rand_Num2);
-    gmp_randinit_default (r_state);
-    gmp_randseed_ui(r_state, seed);
+key_pair genkey_pair(tuple* pqg){
+	key_pair pair;
+	unsigned long x_raise = abs(rand());
+	
 
-    mpz_init2(rand_Num,160);
-    
-    for (int i = 0; i < 5 ; i++){
-    	// fix size error
-       mpz_urandomb(rand_Num,r_state,(N+1));
-       mpz_set(rand_Num2,rand_Num);
-       mpz_urandomb(rand_Num2,r_state,(N+1));
-    }
-    //gmp_printf("x=%Zd\n", rand_Num);
-    //gmp_printf("y=%Zd\n", rand_Num2);
-    mpz_set(pair.x,rand_Num2);
-    mpz_set(pair.y,rand_Num);
-    gmp_randclear(r_state);
-    mpz_clear(rand_Num);
-    mpz_clear(rand_Num2);
+	mpz_t x;
+	mpz_t y;
+
+	mpz_init(pair.x);
+	mpz_init(pair.y);
+	mpz_init(y);
+	mpz_init_set_ui(x,x_raise);
+	
+
+	//mpz_init(max_x);
+	//mpz_ui_pow_ui(max_x,10, 48);
+
+	mpz_powm_ui(x,x,x_raise,(*pqg).q);
+	
+
+	do{
+		mpz_nextprime (x, x);	
+
+	}while( !(mpz_cmp(x,(*pqg).p) < 0) );
+		mpz_set(pair.x,x);
+
+	mpz_powm(y,(*pqg).g,x,(*pqg).p);
+	mpz_set(pair.y,y);
+
+    mpz_clear(x);
+    mpz_clear(y);
+    //mpz_clear(max_x);
+    //mpz_clear(max_y);
+
 return	pair;
 }
 
@@ -118,15 +127,15 @@ m_inverse inverse_value(mpz_t* z,mpz_t* a){ //from assignment 2
 
 int signing_operation(tuple* pqg,key_pair (*a),message_digest* m){
 	 mpz_t r,s,k,k_inv,z,tmp;
-	 key_pair kp = genkey_pair();
+	 key_pair kp = genkey_pair(pqg);
 	 
 	 mpz_init(r);mpz_init(s);mpz_init(k);mpz_init(k_inv);mpz_init(tmp);mpz_init(z);
-	 mpz_set(k,kp.y);
+	 mpz_set(k,kp.x);
 	 mpz_set_ui(k,3);
-	 gmp_printf("k%Zd\n", k);
-	 string message_  = " \n";//((*m).M);
+	 //gmp_printf("k%Zd\n", k);
+	 string message_  = ((*m).M);
 	mpz_set(k_inv,inverse_value(&k,&(*pqg).q).p);
-	gmp_printf("kinv=%Zd\n", k_inv);
+	//gmp_printf("kinv=%Zd\n", k_inv);
 	mpz_powm(r,(*pqg).g,k,(*pqg).p);
 	mpz_mod(r,r,(*pqg).q);
 
@@ -134,7 +143,7 @@ int signing_operation(tuple* pqg,key_pair (*a),message_digest* m){
 	mpz_set_str(z,message_.c_str(),16);
 	//s = (k^-1)(z+xr) mod q
 	mpz_mul(tmp,(*a).x,r);
-	gmp_printf("tmp=%Zd\n", tmp);
+	//gmp_printf("tmp=%Zd\n", tmp);
 	//gmp_printf("z=%Zd\n", (*m).Mi);
 	mpz_add(tmp,tmp,z);
 	//gmp_printf("tmp=%Zd\n", tmp);
@@ -202,7 +211,7 @@ bool verification_algorithm(tuple* pqg, mpz_t* y, message_digest* m,sign_pair* r
 	if (mpz_cmp(v,(*rs).r) != 0){
 		//gmp_printf("v=%Zd\n", v);
 		 //gmp_printf("r=%Zd\n", (*rs).r);
-		cout << "signature_invalid" <<  2 << endl;
+		cout << "signature_invalid" << endl;
 		return 0;
 	}
 	cout << "signature_valid" << endl;
@@ -239,29 +248,22 @@ return 1;
  }
 
 int main(int argc, char *argv[]){
- //int main(){
   tuple pqg;
    mpz_t z;
    mpz_t a;
    mpz_t y;
-   //string input;
-   string line;  
+   string line;
+
   mpz_init(pqg.p);
   mpz_init(pqg.q);
   mpz_init(pqg.g); 
-  //ifstream myfile(line);//argv[1]);
 
   	getline (cin,line);
   	mpz_set_str(pqg.p,&line.c_str()[2],10);
-  	//ßcout <<"p="<< (&line.c_str()[2]) << endl;
-
 	getline (cin,line);
   	mpz_set_str(pqg.q,&line.c_str()[2],10);
-  	//cout <<"q="<< &line.c_str()[2] << endl;
-
   	getline (cin,line);
   	mpz_set_str(pqg.g,&line.c_str()[2],10);
-  	//cout <<"g="<< &line.c_str()[2] << endl;
 
   	 if (!isvalid(&pqg)){
   	 	return 0;
@@ -271,13 +273,15 @@ int main(int argc, char *argv[]){
   	if(strcmp(line.c_str(),"genkey") == 0){
 	  	//cout << "genkey" << endl
 	  	int n;
+	  	srand(time(NULL));
 	  	getline (cin,line);
 	  	n = atoi(&line.c_str()[2]);
 	  	//cout << n << endl;
 	  	for(int i = 0; i < n;i++){
-	  		key_pair a = genkey_pair();
+	  		key_pair a = genkey_pair(&pqg);
 	  		gmp_printf("r=%Zd\n", a.x);
 	  		gmp_printf("s=%Zd\n", a.y);
+
 	  	}
 	
 	}
@@ -287,23 +291,17 @@ int main(int argc, char *argv[]){
 	   	mpz_init(xy.y);
 	   	mpz_init(xy.x);
 	   	cout << "sign" << endl;
-	   	cout << "next" << endl;
-	   	getline (cin,line);
-	   	cout << "next" << endl;
+	 
+	   	getline (cin,line);   	
   		mpz_set_str(xy.x,&line.c_str()[2],10);
-  		cout << "next" << endl;
-  		//cout << (&line.c_str()[2]) << endl;
-  		//free(line)
 		getline (cin,line);
-		cout << "next" << endl;
   		mpz_set_str(xy.y,&line.c_str()[2],10);
-  		cout << "next" << endl;
+  		
   		while ( getline (cin,line) )
     	{
   			D.M = &line.c_str()[2];
-
   			signing_operation(&pqg,&xy,&D);
-  			cout << "next" << endl;	
+  			
     	}
 	 }
 	else if(strcmp(line.c_str(),"verify") == 0){
@@ -316,16 +314,18 @@ int main(int argc, char *argv[]){
 		cout << "verify" << endl;
 		getline (cin,line);
   		mpz_set_str(xy.y,&line.c_str()[2],10);
-
-  		while ( getline (cin,line) )
+  		( getline (cin,line) && line.length() > 0 );
+  		do 
     	{
   			D.M = &line.c_str()[2];
     		getline (cin,line);
+  			cout << line << endl;
   			mpz_set_str(rs.r,&line.c_str()[2],10);
   			getline (cin,line);
+  			cout << line << endl;
   			mpz_set_str(rs.s,&line.c_str()[2],10);
       		verification_algorithm(&pqg, &xy.y, &D,&rs);
-    	}
+    	}while(( getline (cin,line) ));
 
 	};
     mpz_clear(pqg.p);
