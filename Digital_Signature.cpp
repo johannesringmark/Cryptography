@@ -301,7 +301,7 @@ int main(int argc, char *argv[]){
   		while ( getline (cin,line) )
     	{
   			D.M = &line.c_str()[2];
-  			delay
+  			
   			signing_operation(&pqg,&xy,&D);
   			cout << "next" << endl;	
     	}
