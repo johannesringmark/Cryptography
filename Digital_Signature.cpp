@@ -40,10 +40,9 @@ typedef struct {
 }message_digest;
 
 
-key_pair genkey_pair(tuple* pqg){
+key_pair genkey_pair(tuple* pqg){ // generates a new ``key_pair'' with a pseudo random x 
 	key_pair pair;
-	unsigned long x_raise = abs(rand());
-	
+	unsigned long x_raise = rand();  
 
 	mpz_t x;
 	mpz_t y;
@@ -51,28 +50,23 @@ key_pair genkey_pair(tuple* pqg){
 	mpz_init(pair.x);
 	mpz_init(pair.y);
 	mpz_init(y);
+
 	mpz_init_set_ui(x,x_raise);
-	
+	mpz_powm_ui(x,x,x_raise,(*pqg).q); // big random number is create with boundarys 0 < x < q
 
-	//mpz_init(max_x);
-	//mpz_ui_pow_ui(max_x,10, 48);
 
-	mpz_powm_ui(x,x,x_raise,(*pqg).q);
-	
-
-	do{
+	do{ // while x is less then p find next prime for x
 		mpz_nextprime (x, x);	
 
 	}while( !(mpz_cmp(x,(*pqg).p) < 0) );
 		mpz_set(pair.x,x);
 
+	// y is created from raising g to x modulo p
 	mpz_powm(y,(*pqg).g,x,(*pqg).p);
 	mpz_set(pair.y,y);
 
     mpz_clear(x);
     mpz_clear(y);
-    //mpz_clear(max_x);
-    //mpz_clear(max_y);
 
 return	pair;
 }
@@ -102,12 +96,15 @@ m_inverse inverse_value(mpz_t* z,mpz_t* a){ //from assignment 2
 	do{
 		//quotient = floor((i+0.0)/(j+0.0));
 		mpz_div(quotient,i,j);
+
 		//rem = i - ( j * quotient);
 		mpz_mul(tmp,j,quotient);
 		mpz_sub(rem,i,tmp);
+
 		//y = y2 - (y1 * quotient);
 		mpz_mul(tmp,y1,quotient);
 		mpz_sub(y,y2,tmp);
+
 		//i = j; j = rem; y2 = y1;y1 = y;
 		mpz_set(i,j);
 		mpz_set(j,rem);
@@ -120,12 +117,6 @@ m_inverse inverse_value(mpz_t* z,mpz_t* a){ //from assignment 2
 			zinv.valid = 0;
 			return zinv;
 		};
-		//Following code tests if the inverse is computed accuartly
-		//mpz_init(a1);
-		//mpz_init(a2);
-		//mpz_mul(a1,(inverse_value(&(*rs).s,&(*pqg).q).p),(*rs).s);
-		//mpz_mod(a1,a1,(*pqg).q);
-		//gmp_printf("e %Zd\n", a1);
 
 	zinv.valid = 1;
 	//zinv.p = (y2 % a);
@@ -176,19 +167,11 @@ sign_pair signing_operation(tuple* pqg,key_pair (*a),message_digest* m){
 	return out;
  }
 
-
-
-
-
-
-
-
-
-
+//Defines the signing operation
 bool verification_algorithm(tuple* pqg, mpz_t* y, message_digest* m,sign_pair* rs){
-	 mpz_t w,u1,u2,v,M,tmp2,tmp1,r,a1,a2,z;
+	 mpz_t w,u1,u2,v,tmp2,tmp1,r,z;
 	  
-	  mpz_init(w);mpz_init(u1);mpz_init(u2);mpz_init(v);mpz_init(M);mpz_init(tmp1);mpz_init(tmp2);
+	  mpz_init(w);mpz_init(u1);mpz_init(u2);mpz_init(v);mpz_init(tmp1);mpz_init(tmp2);
 	  mpz_init(z);
 	  string message_  = ((*m).M);
 	  
@@ -198,26 +181,21 @@ bool verification_algorithm(tuple* pqg, mpz_t* y, message_digest* m,sign_pair* r
 		(mpz_cmp((*pqg).q,(*rs).r)> 0) && (mpz_cmp_ui((*rs).s,0) > 0) && (mpz_cmp((*pqg).q,(*rs).s)> 0)) ){
 		return 0;	
 	} 
-	
-	
+
 	//2;
 	// w = s'^-1 mod q
-	// z = the leftmost min(N,outlen) bits of Hash(M')(should bee converted to integer)
-	// u1 = (zw) mod q
-	// u2 = ((r')w) mod q.
-	// v  = (g^u1 y^u2 mod p)mod q
-
 	mpz_mod(w,inverse_value(&(*rs).s,&(*pqg).q).p,(*pqg).q);
 
+	// z = the leftmost min(N,outlen) bits of Hash(M')(should bee converted to integer)
 	mpz_set_str(z,message_.c_str(),16);
-
+	// u1 = (zw) mod q
 	mpz_mul(u1,w,z);
 	mpz_mod(u1,u1,(*pqg).q);
-
+	// u2 = ((r')w) mod q.
 	mpz_mul(u2,(*rs).r,w);
 	mpz_mod(u2,u2,(*pqg).q);
 	
-	//v  = (((pqg.g^(u1) * y^(u2)) % pqg.p) % pqg.q);
+	// v  = (g^u1 y^u2 mod p)mod q
 	mpz_powm(tmp1,(*pqg).g,u1,(*pqg).p);
 	mpz_powm(tmp2,(*y),u2,(*pqg).p);
 	mpz_mul(v,tmp1,tmp2);
@@ -234,7 +212,7 @@ return 1;
  }
 
 
-
+ //Define the verification algorithm
  int isvalid(tuple* pqg){
 
  	//retriving binary length's 
@@ -245,7 +223,7 @@ return 1;
  	mpz_init(tmp1);
  	mpz_init(tmp2);
  	mpz_init(t);
- 	
+
  	//precalculating q-1
  	mpz_sub_ui(t,(*pqg).p,1);
 
@@ -267,7 +245,6 @@ return 1;
  	){
 
  	cout << "valid_group" << endl;
- 		 
  	return 1;
 	}
 	
@@ -283,12 +260,13 @@ int main(int argc, char *argv[]){
    mpz_t a;
    mpz_t y;
    string line;
-   srand(time(NULL));
+   srand(time(NULL)); // Initializing the pseudo random number generator based on the time. 
 
   mpz_init(pqg.p);
   mpz_init(pqg.q);
   mpz_init(pqg.g); 
 
+  	// parses data from the std input
   	getline (cin,line);
   	mpz_set_str(pqg.p,&line.c_str()[2],10);
 	getline (cin,line);
@@ -364,7 +342,6 @@ int main(int argc, char *argv[]){
     mpz_clear(pqg.p);
   	mpz_clear(pqg.q);
   	mpz_clear(pqg.g);
-
 return 0;
  }
  
